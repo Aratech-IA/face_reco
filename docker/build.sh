@@ -1,1 +1,1 @@
-docker build -f docker/Dockerfile --rm -t aratechia/api_ia:$1 .
+docker build -f docker/Dockerfile --rm -t aratechia/api_face_reco:$1 .

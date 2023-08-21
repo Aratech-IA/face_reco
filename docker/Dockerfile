@@ -25,7 +25,7 @@ RUN sed -i  '/config.should_reload:/a  \ \ \ \ \ \ \ \ server.force_exit = True'
 WORKDIR /App
 RUN date +%s >/App/build-date.txt
 COPY docker/start.sh /App
-ADD https://api.github.com/repos/aratech-IA/Api_IA/commits/main latest_commit
-RUN git clone https://github.com/Aratech-IA/Api_IA.git
+ADD https://api.github.com/repos/aratech-IA/face_reco/commits/main latest_commit
+RUN git clone https://github.com/Aratech-IA/face_reco.git
 
 CMD ["/App/start.sh"]
