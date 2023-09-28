@@ -40,13 +40,13 @@ def format_dataframe_to_database(df):
     return df
 
 def extract_picture (video, client_id, filename):
-    path = video[:-4]
-    path_pictures = settings.MEDIA_ROOT + '/pictures_users/' + client_id
-    if os.path.exists(path):
-        for file in os.listdir(path):
-            os.remove(path + '/' + file)
-        os.removedirs(path)
-    os.mkdir(path)
+#    path = video[:-4]
+    path_pictures = settings.MEDIA_ROOT + '/pictures_users/' + client_id + '/' + filename + '/'
+    if os.path.exists(path_pictures):
+        for file in os.listdir(path_pictures):
+            os.remove(path_pictures + file)
+        os.removedirs(path_pictures)
+    Path(path_pictures).mkdir(parents=True, exist_ok=True)
     cap = cv2.VideoCapture(video)
     i = 0
     while cap.isOpened():
@@ -57,7 +57,7 @@ def extract_picture (video, client_id, filename):
 
         if i % 2 == 0:
             cv2.imwrite(
-                path_pictures + '/' + filename + '_' + str(
+                path_pictures + filename + '_' + str(
                     i) + '.jpg', frame)
         i += 1
     cap.release()
@@ -314,16 +314,18 @@ def new_entries(request):
     filename = request.POST.get('filename')
     log_views.info(f'filename: {filename}')
     path_main = settings.MEDIA_ROOT + '/pictures_users/' + identity + "/"
-    path_video = settings.MEDIA_ROOT + '/videos_users/' + identity + "/" + filename + '/'
+    path_video = settings.MEDIA_ROOT + '/videos_users/' + identity + "/"
     path_pictures = settings.MEDIA_ROOT + '/pictures_users/' + identity + "/" + filename + '/'
     path_profile_pic = settings.MEDIA_ROOT + '/profile_pic_users/' + identity + "/" + filename + '/'
     log_views.info(f'path: {path_video}')
     try:
         Path(path_video).mkdir(parents=True, exist_ok=True)
-        path_video_named = path_video + '.mp4'
-        if os.makedirs(os.path.dirname(path_video_named), exist_ok=True):
-            shutil.rmtree(path_video_named)
-            os.makedirs(os.path.dirname(path_video_named))
+        path_video_named = path_video + filename +'.mp4'
+        try:
+            os.remove(path_video_named)
+        except FileNotFoundError:
+            log_views.info(f'File is not present in the system')
+
         with open(path_video_named, 'wb') as wfile:
             wfile.write(decoded_string)
         extract_picture(path_video_named, identity, filename)
@@ -410,10 +412,11 @@ def new_entries(request):
                 break
 
         if face:
+            #need to send a the profile pict to the client
             #async_to_sync(connect_test)(path_dest=path_profile_pic, profile=False, websocket_url=websocket_url)
 
-            os.remove(path_profile_pic + 'profile_pic.jpg')
-            os.rmdir(path_profile_pic)
+            #os.remove(path_profile_pic + 'profile_pic.jpg')
+            #os.rmdir(path_profile_pic)
 
             # create a loader from the folder containing all the new entries
             dataset = datasets.ImageFolder(path_main)
@@ -476,6 +479,8 @@ def new_entries(request):
             # erased pictures
             for pict in parse_photo:
                 os.remove(pict)
+            #erased folder
+            os.removedirs(path_pictures)
 
             log_views.info(f'faces successfully incorporated in the database')
 
