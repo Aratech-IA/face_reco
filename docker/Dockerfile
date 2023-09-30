@@ -27,5 +27,6 @@ RUN date +%s >/App/build-date.txt
 COPY docker/start.sh /App
 ADD https://api.github.com/repos/aratech-IA/face_reco/commits/master latest_commit
 RUN git clone https://github.com/Aratech-IA/face_reco.git
+RUN rm -rf face_reco/.git face_reco/docker && rm face_reco/README.md face_reco/.gitignore
 
 CMD ["/App/start.sh"]
